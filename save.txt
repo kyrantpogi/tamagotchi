@@ -1,0 +1,6 @@
+poop=0
+mass=0
+age=0
+hunger=0
+discipline=0
+happy=0

@@ -1,6 +1,7 @@
 poop=0
 mass=0
-age=0
+age=24
 hunger=0
 discipline=0
 happy=0
+start_date=1730419409

@@ -20,7 +20,6 @@ void Tamagotchi::loadFile() {
 			tamagotchiData[counter] = line;
 			counter++;
 		}
-		
 		saveFile.close();
 	} else {
 		cout << "Could not open save file." << endl;
@@ -30,7 +29,7 @@ void Tamagotchi::loadFile() {
 	for (int i=0; i<sizeof(tamagotchiData)/sizeof(string); i++) { // read line
 		int location = tamagotchiData[i].find("=");
 		string key = tamagotchiData[i].substr(0, location);
-		string value = tamagotchiData[i].substr(location+1, sizeof(tamagotchiData)/sizeof(string) - 1);
+		string value = tamagotchiData[i].substr(location+1, tamagotchiData[i].size());
 
 		if (key == "poop") {
 			poop = stoi(value);
@@ -44,6 +43,25 @@ void Tamagotchi::loadFile() {
 			discipline = stoi(value);
 		} else if (key == "happy") {
 			happy = stof(value);
+		} else if (key == "start_date") {
+			startDate = stoul(value);
+			time_t today;
+			time(&today);
+			if (startDate == 0) {
+				startDate = today;
+				age = (int)((difftime(today, startDate) / 3600) / 24);
+
+				cout << startDate << endl;
+				cout << age << endl;
+
+			} else {
+				age = (int)((difftime(today, startDate) / 3600) / 24);
+
+				cout << "Start Date: " << startDate << endl;
+				cout << "today: " << today << endl;
+				cout << age << endl;
+			}
+
 		}
 	}
 }
@@ -58,6 +76,7 @@ void Tamagotchi::saveData() {
 		saveFile << "hunger=" << hungry << endl;
 		saveFile << "discipline=" << discipline << endl;
 		saveFile << "happy=" << happy << endl;
+		saveFile << "start_date="  << startDate << endl;
 
 		saveFile.close();
 	} else {
@@ -74,7 +93,7 @@ Tamagotchi::Tamagotchi(SDL_Renderer *renderer) {
 	imageRect = {0, 0, 128, 128};
 
 	font = FC_CreateFont();
-	FC_LoadFont(font, pointerOfRenderer, "font/Minecraft.ttf", 20, FC_MakeColor(255,255,255,255), TTF_STYLE_NORMAL); 
+	FC_LoadFont(font, pointerOfRenderer, "font/Minecraft.ttf", 28, FC_MakeColor(255,255,255,255), TTF_STYLE_NORMAL); 
 
 	statScreenImage = loadImage("./images/statsscreen.png", pointerOfRenderer);
 	statScreenImagePos = {100 - (128/2), 100 - (128/2), 128, 128};
@@ -260,6 +279,8 @@ void Tamagotchi::stats(int screen) {
 	if (screen == 0) { // 
 		statScreenImageRect.x = 0;
 		statScreenImageRect.y = 128 * 0;
+		
+		FC_Draw(font, pointerOfRenderer, 138, 56, to_string(age).c_str());
 	} else if (screen == 1) {
 		if (discipline == 0) {
 			statScreenImageRect.x = 0;

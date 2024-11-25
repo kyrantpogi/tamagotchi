@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-
+#include <ctime>
 
 #include "SDL.h"
 #include "SDL_image.h"
@@ -22,10 +22,11 @@ class Tamagotchi {
 		int clockX = 201;
 
 		//stat screen
+		long int startDate;
 		int age = 0;
 		bool poop = 0;
 		int mass = 0;
-		string tamagotchiData[6];
+		string tamagotchiData[7];
 		int discipline = 0; //+25 only
 		float hungry = 0; //+12.5 only
 		float happy = 0;  //+12.5 only
@@ -49,6 +50,10 @@ class Tamagotchi {
 
 		
 	public:
+		//positioning
+		float movingX = 0;
+		float movingY = 0;
+
 		Tamagotchi(SDL_Renderer *renderer);
 		string getTime();
 		void idle(bool showClock);

@@ -173,6 +173,14 @@ void gameMain() {
                         confirmPage = false;
                         menuCounter = -1;
                     }
+                } else if (key == SDLK_y) {
+                    animal.movingY -= 1;
+                } else if (key == SDLK_h) {
+                    animal.movingY += 1;
+                } else if (key == SDLK_g) {
+                    animal.movingX -= 1;
+                } else if (key == SDLK_j) {
+                    animal.movingX += 1;
                 }
             }
         }

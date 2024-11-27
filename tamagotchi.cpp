@@ -33,10 +33,9 @@ void Tamagotchi::loadFile() {
 
 		if (key == "poop") {
 			poop = stoi(value);
-		} else if (key == "mass") {
-			mass = stoi(value);
 		} else if (key == "age") {
 			age = stoi(value);
+			mass = this->ageToMassConversion(age);
 		} else if (key == "hunger") {
 			hungry = stof(value);
 		} else if (key == "discipline") {
@@ -50,16 +49,8 @@ void Tamagotchi::loadFile() {
 			if (startDate == 0) {
 				startDate = today;
 				age = (int)((difftime(today, startDate) / 3600) / 24);
-
-				cout << startDate << endl;
-				cout << age << endl;
-
 			} else {
 				age = (int)((difftime(today, startDate) / 3600) / 24);
-
-				cout << "Start Date: " << startDate << endl;
-				cout << "today: " << today << endl;
-				cout << age << endl;
 			}
 
 		}
@@ -275,12 +266,37 @@ void Tamagotchi::toilet() {
 	
 }
 
+int Tamagotchi::ageToMassConversion(int age) {
+	int mass;
+
+	if (age < 5) {
+		mass = age * 2.1;
+	} else if (age > 5 && age < 10) {
+		mass = age * 2.15;
+	} else if (age > 10 && age < 15) {
+		mass = age * 2.16;
+	} else if (age > 15 && age < 20) {
+		mass = age * 2.17;
+	} else if (age > 20 && age < 25) {
+		mass = age * 2.19;
+	} else if (age > 25 && age < 30) {
+		mass = age * 2.22;
+	} 
+
+	return mass;
+}
+
 void Tamagotchi::stats(int screen) {
 	if (screen == 0) { // 
 		statScreenImageRect.x = 0;
 		statScreenImageRect.y = 128 * 0;
+
+		string ageString = to_string(age) + " y";
+		string massString = to_string(mass) + " g";
 		
-		FC_Draw(font, pointerOfRenderer, 138, 56, to_string(age).c_str());
+		FC_Draw(font, pointerOfRenderer, 125, 56, ageString.c_str());
+		FC_Draw(font, pointerOfRenderer, 125, 127, massString.c_str());
+
 	} else if (screen == 1) {
 		if (discipline == 0) {
 			statScreenImageRect.x = 0;

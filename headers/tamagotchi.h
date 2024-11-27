@@ -62,6 +62,7 @@ class Tamagotchi {
 		void play();
 		void medicine();
 		void toilet();
+		int ageToMassConversion(int age);
 		void stats(int screen);
 		void scold();
 		void loadFile();

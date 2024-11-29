@@ -2,6 +2,7 @@
 #include <ctime>
 #include <string>
 #include <fstream>
+#include <cmath>
 
 #include "SDL.h"
 #include "SDL_image.h"
@@ -9,6 +10,38 @@
 #include "headers/tamagotchi.h"
 #include "headers/loadimage.h"
 using namespace std;
+
+Tamagotchi::Tamagotchi(SDL_Renderer *renderer) {
+	pointerOfRenderer = renderer;
+
+	image = loadImage("./images/tamagotchi.png", pointerOfRenderer);
+	imagePos = {100 - (128 / 2), 100 - (128 / 2), 128, 128};
+	imageRect = {0, 0, 128, 128};
+
+	font = FC_CreateFont();
+	FC_LoadFont(font, pointerOfRenderer, "font/Minecraft.ttf", 28, FC_MakeColor(255,255,255,255), TTF_STYLE_NORMAL); 
+
+	statScreenImage = loadImage("./images/statsscreen.png", pointerOfRenderer);
+	statScreenImagePos = {100 - (128/2), 100 - (128/2), 128, 128};
+	statScreenImageRect = {0, 0, 128, 128};
+
+	eatingScreenImage = loadImage("./images/eatingscreen.png", pointerOfRenderer);
+	eatingScreenImagePos = {100 - (128/2), 100 - (128/2), 128, 128};
+	eatingScreenImageRect = {0, 0, 128, 128};
+
+	lightsScreenImage = loadImage("./images/lights.png", pointerOfRenderer);
+	lightsScreenImagePos = {100 - (128/2), 100 - (128/2), 128, 128};
+	lightsScreenImageRect = {0, 0, 128, 128};
+
+	poopImage = loadImage("./images/poop.png", pointerOfRenderer);
+	poopImagePos = {0, 0, 64, 64};
+	poopImageRect = {64, 0, 64, 64};
+
+	toiletImage = loadImage("./images/toilet.png", pointerOfRenderer);
+	toiletImagePos = {96, 100 - (128 / 2), 128, 128};
+	toiletImageRect = {0, 0, 128, 128};
+
+}
 
 void Tamagotchi::loadFile() {
 
@@ -60,6 +93,10 @@ void Tamagotchi::loadFile() {
 void Tamagotchi::saveData() {
 	ofstream saveFile("save.txt");
 
+	if (hungry < 0) {
+		hungry = 0;
+	}
+
 	if (saveFile.is_open()) {
 		saveFile << "poop=" << poop << endl;
 		saveFile << "mass=" << mass << endl;
@@ -74,30 +111,6 @@ void Tamagotchi::saveData() {
 		cout << "Could not save file." << endl;
 		return;
 	}
-}
-
-Tamagotchi::Tamagotchi(SDL_Renderer *renderer) {
-	pointerOfRenderer = renderer;
-
-	image = loadImage("./images/tamagotchi.png", pointerOfRenderer);
-	imagePos = {100 - (128 / 2), 100 - (128 / 2), 128, 128};
-	imageRect = {0, 0, 128, 128};
-
-	font = FC_CreateFont();
-	FC_LoadFont(font, pointerOfRenderer, "font/Minecraft.ttf", 28, FC_MakeColor(255,255,255,255), TTF_STYLE_NORMAL); 
-
-	statScreenImage = loadImage("./images/statsscreen.png", pointerOfRenderer);
-	statScreenImagePos = {100 - (128/2), 100 - (128/2), 128, 128};
-	statScreenImageRect = {0, 0, 128, 128};
-
-	eatingScreenImage = loadImage("./images/eatingscreen.png", pointerOfRenderer);
-	eatingScreenImagePos = {100 - (128/2), 100 - (128/2), 128, 128};
-	eatingScreenImageRect = {0, 0, 128, 128};
-
-	lightsScreenImage = loadImage("./images/lights.png", pointerOfRenderer);
-	lightsScreenImagePos = {100 - (128/2), 100 - (128/2), 128, 128};
-	lightsScreenImageRect = {0, 0, 128, 128};
-
 }
 
 string Tamagotchi::getTime() {
@@ -134,12 +147,21 @@ void Tamagotchi::idle(bool showClock) {
 	string convertedTime = getTime();
 	if (!showClock) {
 		animationCounter++;
+		//poop clock
+		if (animationCounter % 20 == 0) {
+			poopAnimation++;
+			if (poopAnimation > 1) {
+				poopAnimation = 0;
+			}
+			poopImageRect.x = 64 * poopAnimation;
+		}
+
 		if (animationCounter % 30 == 0) {
 			clock++;
 			if (clock > 4) {
 				clock = 0;
 			}
-
+			
 			imageRect.x = 128 * clock;
 		}
 	}
@@ -152,6 +174,13 @@ void Tamagotchi::idle(bool showClock) {
 				clockX -= 2;
 			}
 		}
+
+		if (poopPoints[0][0] != -51) {
+			for (int i=0; i<2; i++) {
+				poopPoints[i][0] -= 2;
+			}
+		}
+
 	} else {
 		if (imagePos.x != 100 - (128 / 2)) {
 			imagePos.x += 2;
@@ -159,10 +188,42 @@ void Tamagotchi::idle(bool showClock) {
 				clockX += 2;
 			}
 		}
+
+		if (poopPoints[0][0] != 149) {
+			for (int i=0; i<2; i++) {
+				poopPoints[i][0] += 2;
+			}
+		}
 	}
 
 	FC_Draw(font, pointerOfRenderer, clockX, 70, convertedTime.c_str());
 	SDL_RenderCopy(pointerOfRenderer, image, &imageRect, &imagePos);
+
+	for (int i=0; i<poop; i++) {
+
+		poopImagePos.x = poopPoints[i][0];
+		poopImagePos.y = poopPoints[i][1];
+
+		SDL_RenderCopy(pointerOfRenderer, poopImage, &poopImageRect, &poopImagePos);
+	}
+	
+}
+
+void Tamagotchi::decreaseHungerAndPoop(int *counter) {
+	(*counter)++;
+	if (*counter % 100 == 0) {
+		if (poop < 2 && hungry == 50 || hungry == 0) {
+			poop++;
+		}
+		if (hungry > -1) {
+			hungry -= 12.5;
+			cout << hungry << endl;
+			if (hungry == -12.5) {
+				hungry == 0;
+			}
+		}
+		*counter = 0;
+	}
 }
 
 
@@ -238,6 +299,7 @@ void Tamagotchi::eating(int choiceOfFood, bool *proceedToEat, bool *dontLeavePag
 		}
 	}
 
+
 	SDL_RenderCopy(pointerOfRenderer, eatingScreenImage, &eatingScreenImageRect, &eatingScreenImagePos);
 }
 
@@ -262,7 +324,35 @@ void Tamagotchi::medicine() {
 	
 }
 
-void Tamagotchi::toilet() {
+void Tamagotchi::toilet(int *menuCounter, bool *confirmPage, bool *shouldDecreaseHunger) {
+	
+	if (imagePos.x > -220) {
+		toiletImagePos.x -= 2;
+		imagePos.x -= 2;
+		for (int i=0; i<poop; i++) {
+			poopPoints[i][0] -= 2;
+		}
+
+		SDL_RenderCopy(pointerOfRenderer, image, &imageRect, &imagePos);
+
+		for (int i=0; i<poop; i++) {
+
+			poopImagePos.x = poopPoints[i][0];
+			poopImagePos.y = poopPoints[i][1];
+
+			SDL_RenderCopy(pointerOfRenderer, poopImage, &poopImageRect, &poopImagePos);
+		}
+
+		SDL_RenderCopy(pointerOfRenderer, toiletImage, &toiletImageRect, &toiletImagePos);
+
+	} else {
+		toiletImagePos.x = 96;
+		poop = 0;
+		*confirmPage = false;
+		*menuCounter = -1;
+		*shouldDecreaseHunger = true;
+	}
+
 	
 }
 
@@ -305,7 +395,7 @@ void Tamagotchi::stats(int screen) {
 		}
 		statScreenImageRect.y = 128 * 1;
 	} else if (screen == 2) {
-		if (hungry == 0) {
+		if (hungry == 0 || hungry == -12.5) {
 			statScreenImageRect.x = 0;
 		} else {
 			statScreenImageRect.x = 128 * (hungry / 12.5);

@@ -65,6 +65,7 @@ struct {
     bool dontLeavePage = false;
     bool lightChoice = true;
     int lightMode = 1; //1 on 0 off
+    int hungerCounter = 0;
 } tamagotchiVals;
 
 void gameMain() {
@@ -106,6 +107,7 @@ void gameMain() {
     
     int menuCounter = -1;
     bool confirmPage = false;
+    bool shouldDecreaseHunger = true;
 
     float FPS = 60;
     float desiredDelta = 1000 / 60;
@@ -189,6 +191,12 @@ void gameMain() {
         //everything here
         
         updateIcons(renderer, icons, iconRect, iconPos, menuCounter);
+
+        
+        if (shouldDecreaseHunger) {
+            animal.decreaseHungerAndPoop(&tamagotchiVals.hungerCounter);
+        }
+        
         
 
         if (confirmPage) {
@@ -201,7 +209,8 @@ void gameMain() {
             } else if (menuCounter == 3) {
                 animal.medicine();
             } else if (menuCounter == 4) {
-                animal.toilet();
+                shouldDecreaseHunger = false;
+                animal.toilet(&menuCounter, &confirmPage, &shouldDecreaseHunger);
             } else if (menuCounter == 5) {
                 animal.stats(tamagotchiVals.statScreenMenu);
             } else if (menuCounter == 6) {
@@ -229,7 +238,7 @@ void gameMain() {
         }
     }
 
-    animal.saveData();
+    // animal.saveData();
 
     IMG_Quit();
     SDL_Quit();

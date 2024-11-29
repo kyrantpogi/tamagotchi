@@ -17,6 +17,7 @@ class Tamagotchi {
 		FC_Font *font;
 		int animationCounter;
 		int clock;
+		int poopAnimation = 0;
 
 		//internal clock
 		int clockX = 201;
@@ -24,7 +25,7 @@ class Tamagotchi {
 		//stat screen
 		long int startDate;
 		int age = 0;
-		bool poop = 0;
+		int poop = 0;
 		int mass = 0;
 		string tamagotchiData[7];
 		int discipline = 0; //+25 only
@@ -45,10 +46,22 @@ class Tamagotchi {
 		SDL_Texture *lightsScreenImage;
 		SDL_Rect lightsScreenImagePos;
 		SDL_Rect lightsScreenImageRect;
-		
+
+		//poop
+		int poopPoints[2][2] = {
+			{149, 108},
+			{149, 26}
+		};
+		SDL_Texture *poopImage;
+		SDL_Rect poopImagePos;
+		SDL_Rect poopImageRect;
+
+		//toilet
+		SDL_Texture *toiletImage;
+		SDL_Rect toiletImagePos;
+		SDL_Rect toiletImageRect;
 
 
-		
 	public:
 		//positioning
 		float movingX = 0;
@@ -57,11 +70,12 @@ class Tamagotchi {
 		Tamagotchi(SDL_Renderer *renderer);
 		string getTime();
 		void idle(bool showClock);
+		void decreaseHungerAndPoop(int *counter);
 		void eating(int choiceOfFood, bool *proceedToEat, bool *dontLeavePage);
 		void lights(bool *lightChoice);
 		void play();
 		void medicine();
-		void toilet();
+		void toilet(int *menuCounter, bool *confirmPage, bool *shouldDecreaseHunger);
 		int ageToMassConversion(int age);
 		void stats(int screen);
 		void scold();

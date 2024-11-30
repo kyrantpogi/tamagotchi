@@ -41,6 +41,10 @@ Tamagotchi::Tamagotchi(SDL_Renderer *renderer) {
 	toiletImagePos = {96, 100 - (128 / 2), 128, 128};
 	toiletImageRect = {0, 0, 128, 128};
 
+	scoldImage = loadImage("./images/scold.png", pointerOfRenderer);
+	scoldImagePos = {100 - (128 / 2), 100 - (128 / 2), 128, 128};
+	scoldImageRect = {0, 0, 128, 128};
+
 }
 
 void Tamagotchi::loadFile() {
@@ -391,7 +395,7 @@ void Tamagotchi::stats(int screen) {
 		if (discipline == 0) {
 			statScreenImageRect.x = 0;
 		} else {
-			statScreenImageRect.x = 128 * ((discipline / 25));
+			statScreenImageRect.x = 128 * (discipline / 25);
 		}
 		statScreenImageRect.y = 128 * 1;
 	} else if (screen == 2) {
@@ -414,6 +418,31 @@ void Tamagotchi::stats(int screen) {
 	SDL_RenderCopy(pointerOfRenderer, statScreenImage, &statScreenImageRect, &statScreenImagePos);
 }
 
-void Tamagotchi::scold() {
-	
+void Tamagotchi::scold(int *menuCounter, bool *confirmPage) {
+	animationCounter++;
+	if (animationCounter % 30 == 0) {
+		scoldAnimation++;
+		if (animationCounter > 450) {
+			if (discipline == 100) {
+				discipline = 100;
+			} else {
+				discipline += 25;
+			}
+			animationCounter = 0;
+			*confirmPage = false;
+			*menuCounter = -1;
+		}
+
+		if (scoldAnimation > 1) {
+			scoldAnimation = 0;
+		}
+
+		scoldImageRect.x = 128 * scoldAnimation;
+	}
+
+	SDL_RenderCopy(pointerOfRenderer, scoldImage, &scoldImageRect, &scoldImagePos);
+}
+
+void Tamagotchi::resetAnimationCounter() {
+	animationCounter = 0;
 }

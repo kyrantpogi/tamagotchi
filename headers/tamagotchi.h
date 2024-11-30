@@ -61,6 +61,12 @@ class Tamagotchi {
 		SDL_Rect toiletImagePos;
 		SDL_Rect toiletImageRect;
 
+		//scold 
+		int scoldAnimation = 0;
+		SDL_Texture *scoldImage;
+		SDL_Rect scoldImagePos;
+		SDL_Rect scoldImageRect;
+
 
 	public:
 		//positioning
@@ -78,7 +84,8 @@ class Tamagotchi {
 		void toilet(int *menuCounter, bool *confirmPage, bool *shouldDecreaseHunger);
 		int ageToMassConversion(int age);
 		void stats(int screen);
-		void scold();
+		void scold(int *menuCounter, bool *confirmPage);
 		void loadFile();
 		void saveData();
+		void resetAnimationCounter();
 };

@@ -168,6 +168,8 @@ void gameMain() {
                             if (tamagotchiVals.statScreenMenu > 3) {
                                 tamagotchiVals.statScreenMenu = 0;
                             }
+                        } else if (menuCounter == 6) {
+                            animal.resetAnimationCounter();
                         }
                     }
                 } else if (key == SDLK_e) { // confirm CHOICE
@@ -214,7 +216,7 @@ void gameMain() {
             } else if (menuCounter == 5) {
                 animal.stats(tamagotchiVals.statScreenMenu);
             } else if (menuCounter == 6) {
-                animal.scold();
+                animal.scold(&menuCounter, &confirmPage);
             } 
         } else {
             animal.idle(tamagotchiVals.showClock);

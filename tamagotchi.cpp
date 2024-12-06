@@ -2,6 +2,7 @@
 #include <ctime>
 #include <string>
 #include <fstream>
+#include <stdlib.h>
 #include <cmath>
 
 #include "SDL.h"
@@ -45,6 +46,16 @@ Tamagotchi::Tamagotchi(SDL_Renderer *renderer) {
 	scoldImagePos = {100 - (128 / 2), 100 - (128 / 2), 128, 128};
 	scoldImageRect = {0, 0, 128, 128};
 
+
+	playLoadImage = loadImage("./images/play_loading.png", pointerOfRenderer);
+	playLoadImagePos = {100 - (128 / 2), 100 - (128 / 2), 128, 128};
+
+	playImage = loadImage("./images/play.png", pointerOfRenderer);
+	playImagePos = {(100 - (128 / 2)) - 128, 100 - (128 / 2), 128, 128};
+	playImageRect = {0, 0, 128, 128};
+
+	scoreScreenImage = loadImage("./images/scorescreen.png", pointerOfRenderer);
+	scoreScreenImagePos = {(100 - (128 / 2)), 100 - (128 / 2), 128, 128};
 }
 
 void Tamagotchi::loadFile() {
@@ -231,6 +242,12 @@ void Tamagotchi::decreaseHungerAndPoop(int *counter) {
 }
 
 
+void Tamagotchi::setPoopStandard() {
+	if (poop > 2) {
+		poop = 2;
+	}
+}
+
 void Tamagotchi::eating(int choiceOfFood, bool *proceedToEat, bool *dontLeavePage) {
 	if (choiceOfFood == 0) { // burger
 		if (*proceedToEat == true) {
@@ -242,6 +259,7 @@ void Tamagotchi::eating(int choiceOfFood, bool *proceedToEat, bool *dontLeavePag
 						dontEatFrame = 0;
 						*dontLeavePage = false;
 						*proceedToEat = false;
+						animationCounter = false;
 					} else {
 						eatingScreenImageRect.x = 128 * dontEatFrame;
 						eatingScreenImageRect.y = 128 * 3;
@@ -256,6 +274,7 @@ void Tamagotchi::eating(int choiceOfFood, bool *proceedToEat, bool *dontLeavePag
 						hungry += 12.5;
 						*dontLeavePage = false;
 						*proceedToEat = false;
+						animationCounter = false;
 					} else {
 						eatingScreenImageRect.x = 128 * eatingFrame;
 						eatingScreenImageRect.y = 128 * 2;
@@ -279,6 +298,7 @@ void Tamagotchi::eating(int choiceOfFood, bool *proceedToEat, bool *dontLeavePag
 						dontEatFrame = 0;
 						*dontLeavePage = false;
 						*proceedToEat = false;
+						animationCounter = false;
 					}
 					eatingScreenImageRect.x = 128 * dontEatFrame;
 					eatingScreenImageRect.y = 128 * 3;
@@ -291,6 +311,7 @@ void Tamagotchi::eating(int choiceOfFood, bool *proceedToEat, bool *dontLeavePag
 						hungry += 12.5;
 						*dontLeavePage = false;
 						*proceedToEat = false;
+						animationCounter = false;
 					}
 					eatingScreenImageRect.x = 128 * eatingFrame;
 					eatingScreenImageRect.y = 128;
@@ -320,8 +341,125 @@ void Tamagotchi::lights(bool *lightChoice) {
 	
 }
 
-void Tamagotchi::play() {
-	
+int Tamagotchi::randomNum(int min, int max) {
+	int value = rand() % (min - max + 1) + min;
+    return value;
+}
+
+void Tamagotchi::play(bool *leftClick, bool *rightClick, int *menuCounter, bool *confirmPage) {
+	if (attempt < 4) {
+		playAnimationCounter++;
+		switchImage = playImage;
+
+		if (!isLoadingDone) {
+			if (playImagePos.x >= (100 - (128 / 2))) {
+				playImagePos.x = 100 - (128 / 2);
+				randomX = this->randomNum(1, 9);
+				randomY = this->randomNum(1, 9);
+				cout << randomX << randomY;
+				isLoadingDone = true;
+			}
+			playLoadImagePos.x += 1;
+			playImagePos.x += 1;
+
+			SDL_RenderCopy(pointerOfRenderer, playLoadImage, NULL, &playLoadImagePos);
+			SDL_RenderCopy(pointerOfRenderer, playImage, &playImageRect, &playImagePos);
+		} else {
+			//game
+			if (playAnimationCounter % 30 == 0) {
+				toggleAnimation = 1 - toggleAnimation;
+				playImageRect.x = 128 * toggleAnimation;
+			}
+
+			if (!*leftClick && !*rightClick) {
+				FC_Draw(font, pointerOfRenderer, 15, 40, to_string(randomX).c_str());
+			}
+			
+			
+			if (*leftClick || *rightClick) {
+				scene++;
+				if (scene < 160) {
+					playImageRect.x = 128 * 2;
+					FC_Draw(font, pointerOfRenderer, 165, 40, to_string(randomY).c_str());
+				} else {
+					//right answers
+					if (randomX > randomY && *leftClick) {
+						if (playAnimationCounter % 30 == 0) {
+							toggleAnimation2 = (toggleAnimation2 == 3) ? 4 : 3;
+							playImageRect.x = 128 * toggleAnimation2;
+						}
+					}
+					if (randomY > randomX && *rightClick) {
+						if (playAnimationCounter % 30 == 0) {
+							toggleAnimation2 = (toggleAnimation2 == 3) ? 4 : 3;
+							playImageRect.x = 128 * toggleAnimation2;
+						}
+					}
+
+					//wrong answers
+					if (randomX > randomY && *rightClick) {
+						switchImage = scoldImage;
+					}
+					if (randomY > randomX && *leftClick) {
+						switchImage = scoldImage;
+					}
+
+					if (scene > 390) {
+						//right answers
+						if (randomX > randomY && *leftClick) {
+							humanScore += 1;
+						}
+						if (randomY > randomX && *rightClick) {
+							humanScore += 1;
+						}
+						//wrong answers
+						if (randomX > randomY && *rightClick) {
+							tamagotchiScore += 1;
+						}
+						if (randomY > randomX && *leftClick) {
+							tamagotchiScore += 1;
+						}
+
+						attempt++;
+						scene = 0;
+						randomX = this->randomNum(1, 9);
+						randomY = this->randomNum(1, 9);
+						*leftClick = false;
+						*rightClick = false;
+					}
+				}
+				
+			}
+			
+			SDL_RenderCopy(pointerOfRenderer, switchImage, &playImageRect, &playImagePos);
+		}
+	} else {
+		scene++;
+		if (scene >= 180) {
+			this->resetPlay(leftClick, rightClick);
+			*confirmPage = false;
+			*menuCounter = -1;
+		}
+		FC_Draw(font, pointerOfRenderer, 15, 40, to_string(humanScore).c_str());
+		FC_Draw(font, pointerOfRenderer, 165, 40, to_string(tamagotchiScore).c_str());
+		SDL_RenderCopy(pointerOfRenderer, scoreScreenImage, NULL, &scoreScreenImagePos);
+	}
+}
+
+void Tamagotchi::resetPlay(bool *leftClick, bool *rightClick) {
+	attempt = 0;
+	scene = 0;
+	*leftClick = false;
+	*rightClick = false;
+	isLoadingDone = false;
+	humanScore = 0;
+	tamagotchiScore = 0;
+	playImagePos.x = (100 - (128 / 2)) - 128;
+	playLoadImagePos.x = 100 - (128 / 2);
+}
+
+bool Tamagotchi::canChooseNumber() {
+	return isLoadingDone;
 }
 
 void Tamagotchi::medicine() {

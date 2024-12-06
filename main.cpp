@@ -2,6 +2,8 @@
 #include <string>
 #include <thread>
 #include <fstream>
+#include <stdlib.h>
+#include <time.h>
 
 #include "SDL.h"
 #include "SDL_image.h"
@@ -66,6 +68,9 @@ struct {
     bool lightChoice = true;
     int lightMode = 1; //1 on 0 off
     int hungerCounter = 0;
+    //play
+    bool leftClick = false;
+    bool rightClick = false;
 } tamagotchiVals;
 
 void gameMain() {
@@ -100,7 +105,7 @@ void gameMain() {
     iconRect.w = 32;
     iconRect.h = 32;
 
-    SDL_Rect sampleRect = {100 - (128 / 2), 100 - (128 / 2), 128, 128};
+    SDL_Rect sampleRect = {0, 100 - (128 / 2), SCREEN_WIDTH, 128};
 
     Tamagotchi animal(renderer);
     animal.loadFile();
@@ -143,6 +148,9 @@ void gameMain() {
                             }
                         } else if (menuCounter == 1) {
                             tamagotchiVals.lightChoice = !tamagotchiVals.lightChoice;
+                        } else if (menuCounter == 2 && animal.canChooseNumber()) {
+                            tamagotchiVals.leftClick = true;
+                            tamagotchiVals.rightClick = false;
                         }
                     }
                 } else if (key == SDLK_w) { // confirm page / choice selection
@@ -163,17 +171,19 @@ void gameMain() {
                                 menuCounter = -1;
                                 confirmPage = false;
                             }
+                        } else if (menuCounter == 2 && animal.canChooseNumber()) {
+                            tamagotchiVals.leftClick = false;
+                            tamagotchiVals.rightClick = true;
                         } else if (menuCounter == 5) { //stats
                             tamagotchiVals.statScreenMenu++;
                             if (tamagotchiVals.statScreenMenu > 3) {
                                 tamagotchiVals.statScreenMenu = 0;
                             }
-                        } else if (menuCounter == 6) {
-                            animal.resetAnimationCounter();
                         }
                     }
                 } else if (key == SDLK_e) { // confirm CHOICE
                     if (!tamagotchiVals.dontLeavePage) {
+                        animal.resetPlay(&tamagotchiVals.leftClick, &tamagotchiVals.rightClick);
                         confirmPage = false;
                         menuCounter = -1;
                     }
@@ -190,6 +200,7 @@ void gameMain() {
         }
         SDL_RenderClear(renderer);
         
+        
         //everything here
         
         updateIcons(renderer, icons, iconRect, iconPos, menuCounter);
@@ -198,7 +209,7 @@ void gameMain() {
         if (shouldDecreaseHunger) {
             animal.decreaseHungerAndPoop(&tamagotchiVals.hungerCounter);
         }
-        
+        animal.setPoopStandard(); // 2 poops only
         
 
         if (confirmPage) {
@@ -207,7 +218,7 @@ void gameMain() {
             } else if (menuCounter == 1) {
                 animal.lights(&tamagotchiVals.lightChoice);
             } else if (menuCounter == 2) {
-                animal.play();
+                animal.play(&tamagotchiVals.leftClick, &tamagotchiVals.rightClick, &menuCounter, &confirmPage);
             } else if (menuCounter == 3) {
                 animal.medicine();
             } else if (menuCounter == 4) {
@@ -230,7 +241,7 @@ void gameMain() {
 
         
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(renderer, 32, 32, 32, 255);
         SDL_RenderPresent(renderer); // copy pixels / update
         int currentTime = SDL_GetTicks();
         int desiredTime = currentTime - start;
@@ -247,6 +258,7 @@ void gameMain() {
 }
 
 int main(int argc, char* args[]) {
+    srand(time(0));
     gameMain();
     return 0;
 }

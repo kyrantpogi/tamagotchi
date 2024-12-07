@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <ctime>
+#include <stdlib.h>
 
 #include "SDL.h"
 #include "SDL_image.h"
@@ -67,6 +68,30 @@ class Tamagotchi {
 		SDL_Rect scoldImagePos;
 		SDL_Rect scoldImageRect;
 
+		//play
+		int scene = 0;
+		bool isLoadingDone = false;
+		int randomX;
+		int randomY;
+		int attempt = 0;
+		int humanScore = 0;
+		int tamagotchiScore = 0;
+
+		int toggleAnimation = 0;
+		int toggleAnimation2 = 3;
+		int playAnimationCounter = 0;
+		SDL_Texture *playLoadImage;
+		SDL_Rect playLoadImagePos;
+
+		SDL_Texture *playImage;
+		SDL_Rect playImagePos;
+		SDL_Rect playImageRect;
+
+		SDL_Texture *switchImage;
+
+		SDL_Texture *scoreScreenImage;
+		SDL_Rect scoreScreenImagePos;
+
 
 	public:
 		//positioning
@@ -79,7 +104,9 @@ class Tamagotchi {
 		void decreaseHungerAndPoop(int *counter);
 		void eating(int choiceOfFood, bool *proceedToEat, bool *dontLeavePage);
 		void lights(bool *lightChoice);
-		void play();
+		void play(bool *leftClick, bool *rightClick, int *menuCounter, bool *confirmPage);
+		void resetPlay(bool *leftClick, bool *rightClick);
+		bool canChooseNumber();
 		void medicine();
 		void toilet(int *menuCounter, bool *confirmPage, bool *shouldDecreaseHunger);
 		int ageToMassConversion(int age);
@@ -88,4 +115,6 @@ class Tamagotchi {
 		void loadFile();
 		void saveData();
 		void resetAnimationCounter();
+		void setPoopStandard();
+		int randomNum(int min, int max);
 };

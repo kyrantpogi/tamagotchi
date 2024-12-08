@@ -14,11 +14,14 @@ class Tamagotchi {
 		SDL_Rect imageRect;
 		SDL_Rect imagePos;
 		SDL_Texture *image;
+		SDL_Texture *sickImage;
+		SDL_Texture *idleSwapImage;
 		SDL_Renderer *pointerOfRenderer;
 		FC_Font *font;
 		int animationCounter;
 		int clock;
 		int poopAnimation = 0;
+		int toggleSickAnimation = 0;
 
 		//internal clock
 		int clockX = 201;
@@ -92,6 +95,15 @@ class Tamagotchi {
 		SDL_Texture *scoreScreenImage;
 		SDL_Rect scoreScreenImagePos;
 
+		//medicine
+		SDL_Texture *noMedicineImage;
+		SDL_Texture *medicineImage;
+		SDL_Rect medicineImageRect;
+		SDL_Rect medicineImagePos;
+
+		int medicineAnimationClock = 0;
+		int medicineToggleAnimation = 0;
+
 
 	public:
 		//positioning
@@ -107,7 +119,7 @@ class Tamagotchi {
 		void play(bool *leftClick, bool *rightClick, int *menuCounter, bool *confirmPage);
 		void resetPlay(bool *leftClick, bool *rightClick);
 		bool canChooseNumber();
-		void medicine();
+		void medicine(int *menuCounter, bool *confirmPage);
 		void toilet(int *menuCounter, bool *confirmPage, bool *shouldDecreaseHunger);
 		int ageToMassConversion(int age);
 		void stats(int screen);

@@ -16,6 +16,7 @@ Tamagotchi::Tamagotchi(SDL_Renderer *renderer) {
 	pointerOfRenderer = renderer;
 
 	image = loadImage("./images/tamagotchi.png", pointerOfRenderer);
+	sickImage = loadImage("./images/sick.png", pointerOfRenderer);
 	imagePos = {100 - (128 / 2), 100 - (128 / 2), 128, 128};
 	imageRect = {0, 0, 128, 128};
 
@@ -56,6 +57,10 @@ Tamagotchi::Tamagotchi(SDL_Renderer *renderer) {
 
 	scoreScreenImage = loadImage("./images/scorescreen.png", pointerOfRenderer);
 	scoreScreenImagePos = {(100 - (128 / 2)), 100 - (128 / 2), 128, 128};
+
+	noMedicineImage = loadImage("./images/nomedicine.png", pointerOfRenderer);
+	medicineImagePos = {100 - (128 / 2), 100 - (128 / 2), 128, 128};
+	medicineImageRect = {0, 0, 128, 128};
 }
 
 void Tamagotchi::loadFile() {
@@ -171,13 +176,23 @@ void Tamagotchi::idle(bool showClock) {
 			poopImageRect.x = 64 * poopAnimation;
 		}
 
-		if (animationCounter % 30 == 0) {
-			clock++;
-			if (clock > 4) {
-				clock = 0;
+
+		if (hungry > -12.5) {
+			idleSwapImage = image;
+			if (animationCounter % 30 == 0) {
+				clock++;
+				if (clock > 4) {
+					clock = 0;
+				}
+				
+				imageRect.x = 128 * clock;
 			}
-			
-			imageRect.x = 128 * clock;
+		} else {
+			idleSwapImage = sickImage;
+			if (animationCounter % 30 == 0) {
+				toggleSickAnimation = 1 - toggleSickAnimation;
+				imageRect.x = 128 * toggleSickAnimation;
+			}
 		}
 	}
 	
@@ -212,7 +227,7 @@ void Tamagotchi::idle(bool showClock) {
 	}
 
 	FC_Draw(font, pointerOfRenderer, clockX, 70, convertedTime.c_str());
-	SDL_RenderCopy(pointerOfRenderer, image, &imageRect, &imagePos);
+	SDL_RenderCopy(pointerOfRenderer, idleSwapImage, &imageRect, &imagePos);
 
 	for (int i=0; i<poop; i++) {
 
@@ -462,8 +477,37 @@ bool Tamagotchi::canChooseNumber() {
 	return isLoadingDone;
 }
 
-void Tamagotchi::medicine() {
-	
+void Tamagotchi::medicine(int *menuCounter, bool *confirmPage) {
+	medicineAnimationClock++;
+	if (medicineAnimationClock >= 150) { // end
+		*menuCounter = -1;
+		*confirmPage = false;
+		medicineAnimationClock = 0;
+
+		if (hungry <= -12.5) {
+			hungry += 12.5;
+		}
+	}
+
+	if (hungry > -12.5) {
+		medicineImage = noMedicineImage;
+
+		if (medicineAnimationClock % 25 == 0) {
+			medicineToggleAnimation = 1 - medicineToggleAnimation;
+			medicineImageRect.x = 128 * medicineToggleAnimation;
+		}
+
+		SDL_RenderCopy(pointerOfRenderer, medicineImage, &medicineImageRect, &medicineImagePos);
+	} else {
+		medicineImage = scoldImage;
+
+		if (medicineAnimationClock % 20 == 0) {
+			medicineToggleAnimation = 1 - medicineToggleAnimation;
+			medicineImageRect.x = 128 * medicineToggleAnimation;
+		}
+
+		SDL_RenderCopy(pointerOfRenderer, medicineImage, &medicineImageRect, &medicineImagePos);
+	}
 }
 
 void Tamagotchi::toilet(int *menuCounter, bool *confirmPage, bool *shouldDecreaseHunger) {

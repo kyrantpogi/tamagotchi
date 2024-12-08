@@ -220,7 +220,7 @@ void gameMain() {
             } else if (menuCounter == 2) {
                 animal.play(&tamagotchiVals.leftClick, &tamagotchiVals.rightClick, &menuCounter, &confirmPage);
             } else if (menuCounter == 3) {
-                animal.medicine();
+                animal.medicine(&menuCounter, &confirmPage);
             } else if (menuCounter == 4) {
                 shouldDecreaseHunger = false;
                 animal.toilet(&menuCounter, &confirmPage, &shouldDecreaseHunger);

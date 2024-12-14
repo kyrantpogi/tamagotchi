@@ -251,7 +251,7 @@ void gameMain() {
         }
     }
 
-    // animal.saveData();
+    animal.saveData();
 
     IMG_Quit();
     SDL_Quit();

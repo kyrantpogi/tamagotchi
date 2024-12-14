@@ -241,7 +241,7 @@ void Tamagotchi::idle(bool showClock) {
 
 void Tamagotchi::decreaseHungerAndPoop(int *counter) {
 	(*counter)++;
-	if (*counter % 100 == 0) {
+	if (*counter % 10000 == 0) {
 		if (poop < 2 && hungry == 50 || hungry == 0) {
 			poop++;
 		}

@@ -1,7 +1,7 @@
 poop=0
-mass=25
-age=12
-hunger=100
-discipline=0
+mass=64
+age=29
+hunger=87.5
+discipline=100
 happy=0
 start_date=1731629118
